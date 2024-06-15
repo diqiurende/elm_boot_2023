@@ -17,7 +17,7 @@ public class Cart_Food {
     private Integer quantity;
     private Food food;
 
-    // Getters and setters
+
 
 
 
