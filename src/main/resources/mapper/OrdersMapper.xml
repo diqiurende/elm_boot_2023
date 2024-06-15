@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.elm.mapper.OrdersMapper">
+
+    <resultMap id="ordersResultMap" type="com.example.elm.domain.Orders">
+        <id property="orderId" column="orderId"/>
+        <result property="userId" column="userId"/>
+        <result property="businessId" column="businessId"/>
+        <result property="orderDate" column="orderDate"/>
+        <result property="orderTotal" column="orderTotal"/>
+        <result property="daId" column="daId"/>
+        <result property="orderState" column="orderState"/>
+
+        <!-- 多对一关联，映射 Business 对象 -->
+        <association property="business" javaType="com.example.elm.domain.Business">
+            <id property="businessId" column="businessId"/>
+            <result property="businessName" column="businessName"/>
+            <result property="businessAddress" column="businessAddress"/>
+            <result property="businessExplain" column="businessExplain"/>
+            <result property="businessImg" column="businessImg"/>
+            <result property="orderTypeId" column="orderTypeId"/>
+            <result property="starPrice" column="starPrice"/>
+            <result property="deliveryPrice" column="deliveryPrice"/>
+            <result property="remarks" column="remarks"/>
+            <!-- 其他 business 对象的字段映射 -->
+        </association>
+
+        <!-- 一对多关联，映射 OrderDetailet 列表 -->
+        <collection property="list" ofType="com.example.elm.domain.OrderDetailet">
+            <id property="odId" column="odId"/>
+            <result property="foodId" column="foodId"/>
+            <result property="quantity" column="quantity"/>
+            <!-- 其他 OrderDetailet 对象的字段映射 -->
+        </collection>
+    </resultMap>
+
+    <select id="getOrderById" resultMap="ordersResultMap">
+        SELECT
+        o.orderId, o.userId, o.businessId, o.orderDate, o.orderTotal, o.daId, o.orderState,
+        b.businessId AS business_businessId, b.businessName AS business_businessName,
+        b.businessAddress AS business_businessAddress, b.businessExplain AS business_businessExplain,
+        b.businessImg AS business_businessImg, b.orderTypeId AS business_orderTypeId,
+        b.starPrice AS business_starPrice, b.deliveryPrice AS business_deliveryPrice, b.remarks AS business_remarks,
+        od.odId AS list_odId, od.foodId AS list_foodId, od.quantity AS list_quantity,
+        f.foodName AS list_foodName, f.foodPrice AS list_foodPrice
+        FROM
+        orders o
+        LEFT JOIN
+        business b ON o.businessId = b.businessId
+        LEFT JOIN
+        orderdetailet od ON o.orderId = od.orderId
+        LEFT JOIN
+        food f ON od.foodId = f.foodId
+        <where>
+            <if test="orderId != null">
+                AND o.orderId = #{orderId}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

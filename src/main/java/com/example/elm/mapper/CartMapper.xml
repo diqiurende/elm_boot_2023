@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.elm.mapper.CartMapper">
+    <resultMap id="cartResultMap" type="com.example.elm.domain.Cart">
+        <!-- 其他字段映射 -->
+        <association property="food" javaType="com.example.elm.domain.Food">
+            <id property="foodId" column="food_foodId"/>
+            <result property="foodImg" column="food_foodImg"/>
+            <result property="foodName" column="food_foodName"/>
+            <result property="foodPrice" column="foodPrice"/>
+            <!-- 其他 food 对象的属性映射 -->
+        </association>
+    </resultMap>
+
+    <select id="listCart" resultMap="cartResultMap">
+        SELECT cart.*, food.foodId AS food_foodId, food.foodImg AS food_foodImg, food.foodName AS food_foodName, food.foodPrice
+        FROM cart
+        LEFT JOIN food ON cart.foodId = food.foodId
+        <where>
+            <!-- 使用动态 SQL 构建查询条件 -->
+            <if test="foodId != null">
+                AND cart.foodId = #{foodId}
+            </if>
+            <if test="businessId != null">
+                AND cart.businessId = #{businessId}
+            </if>
+            <if test="userId != null and userId != ''">
+                AND cart.userId = #{userId}
+            </if>
+            <if test="quantity != null">
+                AND cart.quantity = #{quantity}
+            </if>
+            <!-- 可根据实际需求添加其他条件 -->
+        </where>
+    </select>
+
+    <select id="listCartByBusinessIdAndUserId" resultType="com.example.elm.dto.Cart_Food">
+        SELECT
+            cart.cartId,
+            cart.foodId,
+            cart.businessId,
+            cart.userId,
+            cart.quantity,
+            food.foodId AS food_foodId,
+            food.foodName AS food_foodName,
+            food.foodExplain AS food_explain,
+            food.foodImg AS food_img,
+            food.foodPrice AS food_price,
+            food.businessId AS food_businessId,
+            food.remarks AS food_remarks
+        FROM cart
+                 LEFT JOIN food ON cart.foodId = food.foodId
+        WHERE cart.businessId = #{businessId}
+          AND cart.userId = #{userId}
+    </select>
+
+    <delete id="removeCart">
+        DELETE FROM cart
+        <where>
+            <!-- 使用动态 SQL 构建删除条件 -->
+            <if test="foodId != null">
+                AND foodId = #{foodId}
+            </if>
+            <if test="businessId != null">
+                AND businessId = #{businessId}
+            </if>
+            <if test="userId != null and userId != ''">
+                AND userId = #{userId}
+            </if>
+            <!-- 可根据实际需求添加其他条件 -->
+        </where>
+    </delete>
+</mapper>
